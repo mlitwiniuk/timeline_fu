@@ -2,6 +2,7 @@ require File.dirname(__FILE__)+'/test_helper'
 
 class FiresTest < Test::Unit::TestCase
   def setup
+    @group = create_group
     @account = create_account
     @james = create_person(:account => @account, :email => 'james@giraffesoft.ca')
     @mat   = create_person(:account => @account, :email => 'mat@giraffesoft.ca')
@@ -85,5 +86,18 @@ class FiresTest < Test::Unit::TestCase
                                          :secondary_subject => @comment, 
                                          :event_type        => 'comment_deleted')
     @comment.destroy
+  end
+  
+  def test_should_create_scoped_event
+    @account_new = create_account(:group=>@group, :name=>"test inc.")
+    @person_new = Person.new(hash_for_person(:account => @account, :email => 'john@giraffesoft.ca'))
+    TimelineEvent.expects(:create!).with(:scope           => @group,
+                                         :subject         => @person,
+                                         :event_type      => 'person_created')
+    @person_new.save
+    @person_new = Person.new(hash_for_person(:email => 'bob@giraffesoft.ca'))
+    TimelineEvent.expects(:create!).never
+    @person_new.save
+    
   end
 end

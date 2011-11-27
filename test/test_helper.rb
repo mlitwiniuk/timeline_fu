@@ -13,9 +13,14 @@ ActiveRecord::Base.logger = Logger.new(STDERR)
 ActiveRecord::Base.logger.level = Logger::WARN
 
 ActiveRecord::Schema.define(:version => 0) do
+  create_table :groups do |t|
+    t.string :name
+  end
+  
   create_table :accounts do |t|
     t.string :name, :default => ""
     t.string :description, :default => ""
+    t.references :group
   end
 
   create_table :people do |t|
@@ -35,18 +40,30 @@ ActiveRecord::Schema.define(:version => 0) do
   end
 end
 
+class Group < ActiveRecord::Base
+end
+
 class Account < ActiveRecord::Base
+  belongs_to :group
+  
   has_many :people
+  
 end
 
 class Person < ActiveRecord::Base
   attr_accessor :new_watcher, :fire
 
   belongs_to :account
+  
+  fires :person_created,  :on     => :create,
+                          :scope  => Proc.new { |person| person.account.group },
+                          :if     => lambda { |person| person.account and person.account.group }
 
   fires :follow_created,  :on     => :update, 
                           :actor  => lambda { |person| person.new_watcher }, 
                           :if     => lambda { |person| !person.new_watcher.nil? }
+                          
+  
   fires :person_updated,  :on     => :update,
                           :if     => :fire?
 
@@ -79,10 +96,20 @@ class Comment < ActiveRecord::Base
                           :secondary_subject => :self
 end
 
+
+
 TimelineEvent = Class.new
 
 class Test::Unit::TestCase
   protected
+    def hash_for_group(opts = {})
+      {:name => 'test'}.merge(opts)
+    end
+  
+    def create_group(opts = {})
+      Group.create!(hash_for_group(opts))
+    end
+  
     def hash_for_account(opts = {})
       {:name => "fantasy inc.", :description => "rails shop"}.merge(opts)
     end
