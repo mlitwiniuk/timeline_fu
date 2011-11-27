@@ -91,7 +91,7 @@ class FiresTest < Test::Unit::TestCase
   def test_should_create_scoped_event
     @account_new = create_account(:group=>@group, :name=>"test inc.")
     @person_new = Person.new(hash_for_person(:account => @account, :email => 'john@giraffesoft.ca'))
-    TimelineEvent.expects(:create!).with(:scope           => @group,
+    TimelineEvent.expects(:create!).with(:extra_scope           => @group,
                                          :subject         => @person,
                                          :event_type      => 'person_created')
     @person_new.save

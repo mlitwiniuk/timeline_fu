@@ -56,7 +56,7 @@ class Person < ActiveRecord::Base
   belongs_to :account
   
   fires :person_created,  :on     => :create,
-                          :scope  => Proc.new { |person| person.account.group },
+                          :extra_scope  => Proc.new { |person| person.account.group },
                           :if     => lambda { |person| person.account and person.account.group }
 
   fires :follow_created,  :on     => :update, 
