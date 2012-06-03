@@ -2,8 +2,9 @@ class CreateTimelineEvents < ActiveRecord::Migration
   def self.up
     create_table :timeline_events do |t|
       t.references :account
-      t.string   :event_type, :subject_type,  :actor_type,  :secondary_subject_type,  :extra_scope_type
-      t.integer               :subject_id,    :actor_id,    :secondary_subject_id,    :extra_scope_id
+      t.string    :event_type, :subject_type,  :actor_type,  :secondary_subject_type,  :extra_scope_type
+      t.integer   :subject_id,    :actor_id,    :secondary_subject_id,    :extra_scope_id
+      t.integer   :privacy_level, :default=>0
       t.timestamps
     end
 
